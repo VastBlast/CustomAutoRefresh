@@ -11,21 +11,3 @@ function getCurrentTab() {
         }
     });
 }
-
-/*function refreshTab(tabId) {
-    return new Promise((resolve, reject) => {
-        try {
-            chrome.tabs.reload(tabId, function(){
-				if (chrome.runtime.lastError) {
-					//console.log(chrome.runtime.lastError.message);
-					reject(chrome.runtime.lastError.message);
-				} else {
-					// Tab exists
-					resolve(true);
-				}
-			}); 
-        } catch (e) {
-            reject(e);
-        }
-    });
-}*/
