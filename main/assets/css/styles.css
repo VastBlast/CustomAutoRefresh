@@ -1,0 +1,23 @@
+button:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+*:focus {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+a:hover {
+  color: #007bff;
+}
+
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
