@@ -61,7 +61,7 @@ function startRefresh(tab, interval) {
     let intervalSec = Math.round(interval / 1000);
     stopRefresh(tabId);
     tabIntervals[tabId] = {};
-    tabIntervals[tabId]['intervalTime'] = intervalSec;
+    tabIntervals[tabId]['intervalTime'] = interval / 1000;
 
     refreshTab(tabId); //start it off
     const badgeInterval = setInterval(function () {
@@ -84,8 +84,13 @@ function startRefresh(tab, interval) {
         }
     }, 950);
 
+    tabIntervals[tabId]['running'] = false; //this ensures the miniLoop ends as soon as the user ends the timer
     tabIntervals[tabId]['interval'] = setInterval(async function () {
         try {
+            if (tabIntervals[tabId]['running']) {
+                return;
+            }
+            tabIntervals[tabId]['running'] = true;
             const tab = await getTab(tabId);
             if (tab.status != "complete") {
                 const miniLoop = setInterval(async function () { //this ensures if there is a long load and it is not complete yet, then it will refresh as soon as it loads since its already over the interval time
@@ -93,10 +98,14 @@ function startRefresh(tab, interval) {
                     if (tab.status == "complete") {
                         await refreshTab(tabId);
                         clearInterval(miniLoop);
+                        if (tabIntervals[tabId] != undefined) {
+                            tabIntervals[tabId]['running'] = false;
+                        }
                     }
-                }, 100);
+                }, 50);
             } else {
                 await refreshTab(tabId);
+                tabIntervals[tabId]['running'] = false;
             }
             if (intervalSec > 1) {
                 const badgeInterval = setInterval(function () {

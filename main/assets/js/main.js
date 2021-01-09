@@ -1,6 +1,12 @@
 $("#startRefresh").on("click", async function () {
+    if (parseFloat($('#interval').val()) > 9999999999) {
+        $('#interval').val('9999999999');
+    }
+    if (parseFloat($('#interval').val()) < 0.05) {
+        $('#interval').val('0.05');
+    }
+
     const interval = parseFloat($('#interval').val()) * 1000;
-    sessionStorage.interval = 6;
     if (interval > 0) {}
     else {
         return;

@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Custom Auto Refresh",
-	"description": "A simple chrome extension that automatically refreshes a tab on a set interval.",
+	"description": "A simple and lightweight chrome extension that automatically refreshes a tab on a fully customizable interval.",
 	"version": "1.0",
 	"icons": {
 		"48": "./icons/icon-inactive.png"
