@@ -73,7 +73,7 @@ function startRefresh(tab, interval) {
         if (intervalSecLeft < 1) {
             clearInterval(badgeInterval);
         }
-    }, 1100);
+    }, 950);
 
     tabIntervals[tabId]['interval'] = setInterval(async function () {
         try {
@@ -103,7 +103,7 @@ function startRefresh(tab, interval) {
                     if (intervalSecLeft < 1) {
                         clearInterval(badgeInterval);
                     }
-                }, 1100);
+                }, 950);
             }
         } catch (e) {
             console.log(e);

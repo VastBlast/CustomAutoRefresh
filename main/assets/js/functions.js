@@ -3,6 +3,7 @@ function getCurrentTab() {
         try {
             chrome.tabs.query({
                 active: true,
+                currentWindow: true,
             }, function (tabs) {
                 resolve(tabs[0]);
             });
