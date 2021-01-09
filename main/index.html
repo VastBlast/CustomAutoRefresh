@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>ChromeExt-AutoRefresh</title>
+    <title>Custom Auto Refresh</title>
+    <meta name="description" content="">
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Karla:400,700">
     <link rel="stylesheet" href="assets/css/styles.css">
@@ -12,11 +13,11 @@
 
 <body class="d-flex d-md-flex justify-content-center align-items-center justify-content-md-center align-items-md-center" style="background: rgb(47,54,58);height: 100vh;">
     <div class="container noselect" id="main" style="width: 240px;height: 125px;background: rgb(57,61,62);padding: 15px 5px;">
-        <div class="col d-flex justify-content-center align-items-center" style="padding: 0px;"><span style="font-family: Karla, sans-serif;font-weight: bold;font-size: 18px;color: rgb(242,242,242);">Interval (sec):&nbsp;</span><input type="number" id="interval" style="width: 50px;text-align: center;background: rgba(255,255,255,0.85);outline: none;border: 1px solid black;" min="0"></div>
+        <div class="col d-flex justify-content-center align-items-center" style="padding: 0px;"><span style="font-family: Karla, sans-serif;font-weight: bold;font-size: 18px;color: rgb(242,242,242);">Interval (sec):&nbsp;</span><input type="number" id="interval" style="width: 50px;/*background: rgba(255,255,255,0.85);*/outline: none;text-align: center;border: 1px solid rgba(255,255,255,0.25);background-color: transparent;color: white;border-radius: 4px;font-family: Karla, sans-serif;" min="0" value="5"></div>
         <div class="col d-flex d-md-flex justify-content-center justify-content-md-center" style="margin-top: 14px;">
             <div class="btn-group" role="group" style="font-family: Karla, sans-serif;font-weight: bold;"><button class="btn btn-success" id="startRefresh" type="button" style="border-top-left-radius: 99px;border-bottom-left-radius: 99px;width: 72px;padding-right: 5px;">Start</button><button class="btn btn-danger" id="stopRefresh" type="button" style="border-bottom-right-radius: 99px;border-top-right-radius: 99px;width: 72px;padding-left: 5px;">Stop</button></div>
         </div>
-        <div class="col" style="padding: 0px;margin-top: 6px;"><span style="color: rgb(242,242,242);font-size: 10px;/*opacity: 0.75;*/">Created By:&nbsp;<a href="https://twitter.com/vastblastt" target="_blank"><span style="text-decoration: underline;">@VastBlastt</span></a></span></div>
+        <div class="col" style="padding: 0px;margin-top: 6px;"><span style="color: rgb(242,242,242);font-size: 10px;opacity: 0.75;font-family: Karla, sans-serif;">Created By:&nbsp;<a href="https://twitter.com/vastblastt" target="_blank" style="color: var(--teal);"><span style="text-decoration: underline;">@VastBlastt</span></a></span></div>
     </div>
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>

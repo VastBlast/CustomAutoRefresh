@@ -21,3 +21,16 @@ a:hover {
   user-select: none;
 }
 
+#interval:disabled {
+  opacity: 0.5;
+}
+
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.nounderline {
+  text-decoration: none !important;
+}
+

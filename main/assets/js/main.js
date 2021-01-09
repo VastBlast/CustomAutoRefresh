@@ -44,9 +44,11 @@ async function updatePopup() {
     }, function (res) {
         if (res) {
             $("#startRefresh").prop("disabled", true);
+			$("#interval").prop("disabled", true);
             $("#stopRefresh").prop("disabled", false);
         } else {
             $("#startRefresh").prop("disabled", false);
+			$("#interval").prop("disabled", false);
             $("#stopRefresh").prop("disabled", true);
         }
     });

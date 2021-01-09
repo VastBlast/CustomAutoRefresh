@@ -6,9 +6,12 @@ let getIntervalTime = (() => { //allows us to get the remaining time in an inter
 
     setInterval = (callback, delay) => { // Modify setInterval
         let id = _setInterval(function () {
-            callback();
+            if (typeof callback == "function") {
+                callback();
+            }
             intervalMap[id] = Date.now() + delay; // Store the end time
         }, delay); // Run the original, and store the id
+
         intervalMap[id] = Date.now() + delay; // Store the end time
         return id; // Return the id
     };
@@ -107,7 +110,6 @@ function startRefresh(tab, interval) {
             stopRefresh(tabId);
             return;
         }
-        return;
     }, interval);
 
     chrome.tabs.onUpdated.addListener(function (changedTabId, changeInfo, tab) {
