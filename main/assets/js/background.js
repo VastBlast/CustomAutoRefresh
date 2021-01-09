@@ -44,6 +44,10 @@ function getTab(tabId) {
     return new Promise((resolve, reject) => {
         try {
             chrome.tabs.get(tabId, function (tab) {
+                if (chrome.runtime.lastError) {
+                    reject(false);
+                    return;
+                }
                 resolve(tab);
             });
         } catch (e) {
@@ -66,10 +70,15 @@ function startRefresh(tab, interval) {
             return;
         }
         const intervalSecLeft = Math.round(getIntervalTime(tabIntervals[tabId]['interval']) / 1000);
-        chrome.browserAction.setBadgeText({
-            tabId: tabId,
-            text: intervalSecLeft.toString()
+        chrome.tabs.get(tabId, function () {
+            if (chrome.runtime.lastError)
+                return;
+            chrome.browserAction.setBadgeText({
+                tabId: tabId,
+                text: intervalSecLeft.toString()
+            });
         });
+
         if (intervalSecLeft < 1) {
             clearInterval(badgeInterval);
         }
@@ -96,9 +105,13 @@ function startRefresh(tab, interval) {
                         return;
                     }
                     const intervalSecLeft = Math.round(getIntervalTime(tabIntervals[tabId]['interval']) / 1000);
-                    chrome.browserAction.setBadgeText({
-                        tabId: tabId,
-                        text: intervalSecLeft.toString()
+                    chrome.tabs.get(tabId, function () {
+                        if (chrome.runtime.lastError)
+                            return;
+                        chrome.browserAction.setBadgeText({
+                            tabId: tabId,
+                            text: intervalSecLeft.toString()
+                        });
                     });
                     if (intervalSecLeft < 1) {
                         clearInterval(badgeInterval);
@@ -106,21 +119,29 @@ function startRefresh(tab, interval) {
                 }, 950);
             }
         } catch (e) {
-            console.log(e);
+            //console.log(e);
             stopRefresh(tabId);
             return;
         }
     }, interval);
 
     chrome.tabs.onUpdated.addListener(function (changedTabId, changeInfo, tab) {
+        if (!changeInfo) {
+            return;
+        }
         if (changeInfo.status != "complete" && changeInfo.status != "loading") {
             return;
         }
         if (changedTabId == tabId && tabIntervals[tabId] != undefined) {
-            chrome.browserAction.setIcon({
-                tabId: tabId,
-                path: "./icons/icon-active.png"
+            chrome.tabs.get(tabId, function () {
+                if (chrome.runtime.lastError)
+                    return;
+                chrome.browserAction.setIcon({
+                    tabId: tabId,
+                    path: "./icons/icon-active.png"
+                });
             });
+
         }
     });
 
@@ -131,14 +152,19 @@ function stopRefresh(tabId) {
     else {
         clearInterval(tabIntervals[tabId]['interval']);
         tabIntervals[tabId] = undefined;
-        chrome.browserAction.setIcon({
-            tabId: tabId,
-            path: "./icons/icon-inactive.png"
+        chrome.tabs.get(tabId, function () {
+            if (chrome.runtime.lastError)
+                return;
+            chrome.browserAction.setIcon({
+                tabId: tabId,
+                path: "./icons/icon-inactive.png"
+            });
+            chrome.browserAction.setBadgeText({
+                tabId: tabId,
+                text: ""
+            });
         });
-        chrome.browserAction.setBadgeText({
-            tabId: tabId,
-            text: ""
-        });
+
     }
 }
 
