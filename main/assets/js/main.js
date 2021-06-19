@@ -1,12 +1,12 @@
-$("#startRefresh").on("click", async function () {
-    if (parseFloat($('#interval').val()) > 9999999999) {
-        $('#interval').val('9999999999');
+document.getElementById("startRefresh").addEventListener("click", async function () {
+    if (parseFloat(document.getElementById('interval').value) > 9999999999) {
+        document.getElementById('interval').value = '9999999999';
     }
-    if (parseFloat($('#interval').val()) < 0.05) {
-        $('#interval').val('0.05');
+    if (parseFloat(document.getElementById('interval').value) < 0.05) {
+        document.getElementById('interval').value = '0.05';
     }
 
-    const interval = parseFloat($('#interval').val()) * 1000;
+    const interval = parseFloat(document.getElementById('interval').value) * 1000;
     if (interval > 0) {}
     else {
         return;
@@ -22,7 +22,7 @@ $("#startRefresh").on("click", async function () {
     });
 });
 
-$("#stopRefresh").on("click", async function () {
+document.getElementById("stopRefresh").addEventListener("click", async function () {
     const tab = await getCurrentTab();
     chrome.runtime.sendMessage({
         cmd: "stopRefresh",
@@ -39,8 +39,8 @@ async function updatePopup() {
         cmd: "getRefreshTime",
         tab: tab
     }, function (res) {
-        if ($("#interval").val() == "") {
-            $("#interval").val(res);
+        if (document.getElementById("interval").value == "") {
+            document.getElementById("interval").value = res;
         }
     });
 
@@ -49,15 +49,16 @@ async function updatePopup() {
         tab: tab
     }, function (res) {
         if (res) {
-            $("#startRefresh").prop("disabled", true);
-            $("#interval").prop("disabled", true);
-            $("#stopRefresh").prop("disabled", false);
+            document.getElementById("startRefresh").disabled = true;
+            document.getElementById("interval").disabled = true;
+            document.getElementById("stopRefresh").disabled = false;
         } else {
-            $("#startRefresh").prop("disabled", false);
-            $("#interval").prop("disabled", false);
-            $("#stopRefresh").prop("disabled", true);
+            document.getElementById("startRefresh").disabled = false;
+            document.getElementById("interval").disabled = false;
+            document.getElementById("stopRefresh").disabled = true;
         }
     });
 }
 
 updatePopup();
+document.getElementById("interval").focus();
