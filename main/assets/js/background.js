@@ -73,7 +73,7 @@ function startRefresh(tab, interval) {
         chrome.tabs.get(tabId, function () {
             if (chrome.runtime.lastError)
                 return;
-            chrome.browserAction.setBadgeText({
+            chrome.action.setBadgeText({
                 tabId: tabId,
                 text: intervalSecLeft.toString()
             });
@@ -117,7 +117,7 @@ function startRefresh(tab, interval) {
                     chrome.tabs.get(tabId, function () {
                         if (chrome.runtime.lastError)
                             return;
-                        chrome.browserAction.setBadgeText({
+                        chrome.action.setBadgeText({
                             tabId: tabId,
                             text: intervalSecLeft.toString()
                         });
@@ -145,9 +145,9 @@ function startRefresh(tab, interval) {
             chrome.tabs.get(tabId, function () {
                 if (chrome.runtime.lastError)
                     return;
-                chrome.browserAction.setIcon({
+                chrome.action.setIcon({
                     tabId: tabId,
-                    path: "./icons/icon-active.png"
+                    path: "/icons/icon-active.png"
                 });
             });
 
@@ -164,11 +164,11 @@ function stopRefresh(tabId) {
         chrome.tabs.get(tabId, function () {
             if (chrome.runtime.lastError)
                 return;
-            chrome.browserAction.setIcon({
+            chrome.action.setIcon({
                 tabId: tabId,
-                path: "./icons/icon-inactive.png"
+                path: "/icons/icon-inactive.png"
             });
-            chrome.browserAction.setBadgeText({
+            chrome.action.setBadgeText({
                 tabId: tabId,
                 text: ""
             });
