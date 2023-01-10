@@ -1,189 +1,6 @@
-tabIntervals = {};
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-let getIntervalTime = (() => { //allows us to get the remaining time in an interval
-    let _setInterval = setInterval, // Reference to the original setInterval
-    intervalMap = {}; // intervalMap of all Intervals with their end times
-
-    setInterval = (callback, delay) => { // Modify setInterval
-        let id = _setInterval(function () {
-            if (typeof callback == "function") {
-                callback();
-            }
-            intervalMap[id] = Date.now() + delay; // Store the end time
-        }, delay); // Run the original, and store the id
-
-        intervalMap[id] = Date.now() + delay; // Store the end time
-        return id; // Return the id
-    };
-
-    return (id) => { // The actual getInterval function
-        // If there was no Interval with that id, return NaN, otherwise, return the time left clamped to 0
-        return intervalMap[id] ? Math.max(intervalMap[id] - Date.now(), 0) : NaN;
-    }
-})();
-
-function refreshTab(tabId) {
-    return new Promise((resolve, reject) => {
-        try {
-            chrome.tabs.reload(tabId, function () {
-                if (chrome.runtime.lastError) {
-                    reject(chrome.runtime.lastError.message);
-                } else {
-                    // Tab exists
-                    resolve(true);
-                }
-            });
-
-        } catch (e) {
-            reject(e);
-        }
-    });
-}
-
-function getTab(tabId) {
-    return new Promise((resolve, reject) => {
-        try {
-            chrome.tabs.get(tabId, function (tab) {
-                if (chrome.runtime.lastError) {
-                    reject(false);
-                    return;
-                }
-                resolve(tab);
-            });
-        } catch (e) {
-            reject(e);
-        }
-    });
-}
-
-function startRefresh(tab, interval) {
-    var tabId = tab.id;
-    let intervalSec = Math.round(interval / 1000);
-    stopRefresh(tabId);
-    tabIntervals[tabId] = {};
-    tabIntervals[tabId]['intervalTime'] = interval / 1000;
-
-    refreshTab(tabId); //start it off
-    const badgeInterval = setInterval(function () {
-        if (tabIntervals[tabId] == undefined) {
-            clearInterval(badgeInterval);
-            return;
-        }
-        const intervalSecLeft = Math.round(getIntervalTime(tabIntervals[tabId]['interval']) / 1000);
-        chrome.tabs.get(tabId, function () {
-            if (chrome.runtime.lastError)
-                return;
-            chrome.action.setBadgeText({
-                tabId: tabId,
-                text: intervalSecLeft.toString()
-            });
-        });
-
-        if (intervalSecLeft < 1) {
-            clearInterval(badgeInterval);
-        }
-    }, 950);
-
-    tabIntervals[tabId]['running'] = false; //this ensures the miniLoop ends as soon as the user ends the timer
-    tabIntervals[tabId]['interval'] = setInterval(async function () {
-        try {
-            if (tabIntervals[tabId]['running']) {
-                return;
-            }
-            tabIntervals[tabId]['running'] = true;
-            const tab = await getTab(tabId);
-            if (tab.status != "complete") {
-                const miniLoop = setInterval(async function () { //this ensures if there is a long load and it is not complete yet, then it will refresh as soon as it loads since its already over the interval time
-                    const tab = await getTab(tabId);
-                    if (tab.status == "complete") {
-                        await refreshTab(tabId);
-                        clearInterval(miniLoop);
-                        if (tabIntervals[tabId] != undefined) {
-                            tabIntervals[tabId]['running'] = false;
-                        }
-                    }
-                }, 50);
-            } else {
-                await refreshTab(tabId);
-                tabIntervals[tabId]['running'] = false;
-            }
-            if (intervalSec > 1) {
-                const badgeInterval = setInterval(function () {
-                    if (tabIntervals[tabId] == undefined) {
-                        clearInterval(badgeInterval);
-                        return;
-                    }
-                    const intervalSecLeft = Math.round(getIntervalTime(tabIntervals[tabId]['interval']) / 1000);
-                    chrome.tabs.get(tabId, function () {
-                        if (chrome.runtime.lastError)
-                            return;
-                        chrome.action.setBadgeText({
-                            tabId: tabId,
-                            text: intervalSecLeft.toString()
-                        });
-                    });
-                    if (intervalSecLeft < 1) {
-                        clearInterval(badgeInterval);
-                    }
-                }, 950);
-            }
-        } catch (e) {
-            //console.log(e);
-            stopRefresh(tabId);
-            return;
-        }
-    }, interval);
-
-    chrome.tabs.onUpdated.addListener(function (changedTabId, changeInfo, tab) {
-        if (!changeInfo) {
-            return;
-        }
-        if (changeInfo.status != "complete" && changeInfo.status != "loading") {
-            return;
-        }
-        if (changedTabId == tabId && tabIntervals[tabId] != undefined) {
-            chrome.tabs.get(tabId, function () {
-                if (chrome.runtime.lastError)
-                    return;
-                chrome.action.setIcon({
-                    tabId: tabId,
-                    path: "/icons/icon-active.png"
-                });
-            });
-
-        }
-    });
-
-}
-
-function stopRefresh(tabId) {
-    if (tabIntervals[tabId] == undefined || tabIntervals[tabId] == null) {}
-    else {
-        clearInterval(tabIntervals[tabId]['interval']);
-        tabIntervals[tabId] = undefined;
-        chrome.tabs.get(tabId, function () {
-            if (chrome.runtime.lastError)
-                return;
-            chrome.action.setIcon({
-                tabId: tabId,
-                path: "/icons/icon-inactive.png"
-            });
-            chrome.action.setBadgeText({
-                tabId: tabId,
-                text: ""
-            });
-        });
-
-    }
-}
-
-function getRefreshTime(tabId) {
-    if (tabIntervals[tabId] == undefined || tabIntervals[tabId] == null) {
-        return 5;
-    } else {
-        return tabIntervals[tabId]['intervalTime'];
-    }
-}
+const currentTabs = {};
 
 chrome.runtime.onMessage.addListener(function (req, sender, sendResponse) {
     //sendResponse({ message: "Background has received that message ?" });
@@ -202,14 +19,144 @@ chrome.runtime.onMessage.addListener(function (req, sender, sendResponse) {
     }
 
     if (req.cmd == "isRefreshing") {
-        if (tabIntervals[req.tab.id] == undefined) {
-            var res = false;
-        } else {
-            var res = true;
-        }
-        sendResponse(res);
-        return;
+        return sendResponse(currentTabs[req.tab.id] == undefined ? false : currentTabs[req.tab.id].isActive);
     }
 
     sendResponse({});
+});
+
+
+async function updateUIState(tabId) {
+
+    if (!currentTabs[tabId].ui_state) currentTabs[tabId].ui_state = {
+        badgeText: '',
+        icon: 'inactive'
+    }
+
+    const currentState = currentTabs[tabId].ui_state;
+
+    const newState = {}
+
+    if (currentTabs[tabId].isActive) {
+        let timeLeft = Math.ceil((currentTabs[tabId].nextRefresh - Date.now()) / 1000);
+        if (currentTabs[tabId].interval < 1000 && timeLeft == 1) timeLeft = currentTabs[tabId].interval / 1000;
+        newState.icon = 'active';
+        newState.badgeText = timeLeft.toString();
+    } else {
+        newState.icon = 'inactive';
+        newState.badgeText = '';
+    }
+
+    if (currentState.badgeText != newState.badgeText && currentState.badgeText != '0') {
+        await chrome.action.setBadgeText({
+            tabId: tabId,
+            text: newState.badgeText
+        });
+
+        console.log('Set badge text:', newState.badgeText)
+    }
+
+    if (currentState.icon != newState.icon) {
+        await chrome.action.setIcon({
+            tabId: tabId,
+            path: `/icons/icon-${newState.icon}.png`
+        });
+
+        console.log('Set icon:', newState.icon);
+    }
+
+    currentTabs[tabId].ui_state = newState;
+}
+
+async function refreshTab(tabId) {
+    let resolved = false; // whether the promise has been resolved
+    const promise = new Promise(async (resolve, reject) => {
+
+        currentTabs[tabId].refreshCallback = function () {
+            resolved = true;
+            delete currentTabs[tabId].ui_state;
+            resolve();
+        }
+    });
+
+    const tab = await chrome.tabs.get(tabId);
+
+    // only refresh if the tab is steady / not loading
+    if (tab.status == 'complete') {
+        await chrome.tabs.reload(tabId);
+    }
+
+    (async () => { // this is a fallback in case the callback isn't called (this can be the case if the refresh was manually canceled by a user)
+        while (!resolved) {
+            const tab = await chrome.tabs.get(tabId);
+
+            console.log('tab status2:', tab.status);
+
+            if (tab.status == 'complete' && !resolved && currentTabs[tabId].refreshCallback) {
+                currentTabs[tabId].refreshCallback();
+                break;
+            }
+
+            await delay(500);
+        }
+    })();
+
+    return promise;
+}
+
+
+async function startRefresh(tab, interval) {
+    const tabId = tab.id;
+
+    //stopRefresh(tabId);
+
+    currentTabs[tabId] = {
+        interval: interval,
+        nextRefresh: Date.now(),
+        isActive: true
+    }
+
+    while (currentTabs[tabId] && currentTabs[tabId].isActive) {
+        await updateUIState(tabId);
+        if (currentTabs[tabId].nextRefresh < Date.now()) {
+            try {
+                await refreshTab(tabId);
+            } catch (e) {
+                console.log('ERROR REFRESHING TAB:', e);
+                return delete currentTabs[tabId];//currentTabs[tabId].isActive = false;
+            }
+
+            currentTabs[tabId].nextRefresh = Date.now() + interval;
+        }
+        await delay(50);
+    }
+}
+
+function getRefreshTime(tabId) {
+    if (currentTabs[tabId] == undefined) return 5;
+
+    return currentTabs[tabId].interval / 1000;
+}
+
+function stopRefresh(tabId) {
+    if (!currentTabs[tabId]) return;
+
+    currentTabs[tabId].isActive = false;
+
+    updateUIState(tabId);
+
+    currentTabs[tabId] = {
+        interval: currentTabs[tabId].interval, // keep the interval in case the user clicks into the extension again, so they can see the time they set
+    }
+
+    return;
+}
+
+
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+    if (!changeInfo || !currentTabs[tabId]) return;
+
+    if (changeInfo.status == "complete" && currentTabs[tabId].refreshCallback) {
+        currentTabs[tabId].refreshCallback();
+    }
 });
