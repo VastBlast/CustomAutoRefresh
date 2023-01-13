@@ -1,4 +1,32 @@
+// The code below is in charge of keeping the background script alive to update the badge and refresh the page on time.
+const onUpdate = (tabId, info, tab) => /^https?:/.test(info.url) && findTab([tab]);
+findTab();
+chrome.runtime.onConnect.addListener(port => {
+    if (port.name === 'keepAlive') {
+        setTimeout(() => port.disconnect(), 250e3);
+        port.onDisconnect.addListener(() => findTab());
+    }
+});
+async function findTab(tabs) {
+    if (chrome.runtime.lastError) { /* tab was closed before setTimeout ran */ }
+    for (const { id: tabId } of tabs || await chrome.tabs.query({ url: '*://*/*' })) {
+        try {
+            await chrome.scripting.executeScript({ target: { tabId }, func: connect });
+            chrome.tabs.onUpdated.removeListener(onUpdate);
+            return;
+        } catch (e) { }
+    }
+    chrome.tabs.onUpdated.addListener(onUpdate);
+}
+function connect() {
+    chrome.runtime.connect({ name: 'keepAlive' }).onDisconnect.addListener(connect);
+}
+// end of background keepAlive code
+
+
+
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 
 const currentTabs = {};
 
@@ -112,7 +140,7 @@ async function startRefresh(tab, interval) {
 
     currentTabs[tabId] = {
         interval: interval,
-        nextRefresh: Date.now(),
+        nextRefresh: Date.now() + interval,
         isActive: true
     }
 
@@ -128,7 +156,9 @@ async function startRefresh(tab, interval) {
 
             currentTabs[tabId].nextRefresh = Date.now() + interval;
         }
-        await delay(50);
+        await updateUIState(tabId);
+
+        await delay(Math.min(interval, 1000));
     }
 }
 
