@@ -76,34 +76,8 @@ async function updatePopup() {
 }
 
 
-// on load
-
 document.addEventListener('DOMContentLoaded', function () {
     activateListeners();
     updatePopup();
     document.getElementById("interval").focus();
 }, false);
-
-
-
-
-
-// chrome.runtime.onMessage.addListener(
-//     function (request, sender, sendResponse) {
-//         console.log('Message received in main script: ' + request.message);
-//     }
-// );
-
-// async function test(){
-//     const tab = await getCurrentTab();
-//     chrome.runtime.sendMessage({
-//         tab: tab,
-//         message: 'hello from main.js'
-//     });
-
-//     chrome.runtime.sendMessage({
-//         message: 'hello from main.js2'
-//     });
-// }
-
-// test();
