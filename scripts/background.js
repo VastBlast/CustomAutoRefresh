@@ -136,8 +136,6 @@ async function refreshTab(tabId) {
 async function startRefresh(tab, interval) {
     const tabId = tab.id;
 
-    //stopRefresh(tabId);
-
     currentTabs[tabId] = {
         interval: interval,
         nextRefresh: Date.now() + interval,
