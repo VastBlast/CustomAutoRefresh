@@ -26,9 +26,12 @@ function connect() {
 
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-
+var scrollInterval;
 
 const currentTabs = {};
+
+function scrollToBottom() { scrollInterval = setInterval(() => { window.scrollBy(0, 50); }, 3000); }
+function stopScroll() { clearInterval(scrollInterval); }
 
 chrome.runtime.onMessage.addListener(function (req, sender, sendResponse) {
     //sendResponse({ message: "Background has received that message ?" });
@@ -109,9 +112,20 @@ async function refreshTab(tabId) {
 
     const tab = await chrome.tabs.get(tabId);
 
+    // reset the scroll to the top of the page
+    function scrollToTop() { window.scrollTo(0, 0); }
+
     // only refresh if the tab is steady / not loading
     if (tab.status == 'complete') {
-        await chrome.tabs.reload(tabId);
+        await chrome.tabs.reload(tabId, { bypassCache: true }, function () {
+
+            // go to top of the page
+            chrome.scripting
+                .executeScript({
+                    target: { tabId, allFrames: true },
+                    func: scrollToTop
+                })
+        });
     }
 
     (async () => { // this is a fallback in case the callback isn't called (this can be the case if the refresh was manually canceled by a user)
@@ -177,6 +191,19 @@ function stopRefresh(tabId) {
         interval: currentTabs[tabId].interval, // keep the interval in case the user clicks into the extension again, so they can see the time they set
     }
 
+    // stops page from scroll down
+    chrome.scripting
+        .executeScript({
+            target: {
+                tabId: tabId,
+                allFrames: true,
+            },
+            func: stopScroll
+        })
+        .then(() => {
+            console.log('stopped scrolling process...');
+        });
+
     return;
 }
 
@@ -186,5 +213,18 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
     if (changeInfo.status == "complete" && currentTabs[tabId].refreshCallback) {
         currentTabs[tabId].refreshCallback();
+
+        // scroll down
+        chrome.scripting
+            .executeScript({
+                target: {
+                    tabId: tabId,
+                    allFrames: true,
+                },
+                func: scrollToBottom
+            })
+            .then(() => {
+                console.log('started scrolling process...');
+            });
     }
 });
