@@ -1,32 +1,44 @@
 <!DOCTYPE html>
-<html data-bs-theme="dark">
-
+<html data-bs-theme="dark" lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custom Auto Refresh</title>
     <meta name="description" content="">
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/Karla.css">
     <link rel="stylesheet" href="assets/css/styles.css">
-<script defer src="../../scripts/main.js"></script>
+    <script defer src="../../scripts/main.js"></script>
 </head>
-
-<body class="d-flex d-md-flex justify-content-center align-items-center justify-content-md-center align-items-md-center" style="background: rgb(47,54,58);/*height: 100vh;*/">
-    <div class="container noselect" style="width: 240px;height: 126px;background: rgb(28,30,36);padding: 15px 5px;/*border: 2px solid red;*/">
-        <div class="col d-flex justify-content-center align-items-center" style="padding: 0px;"><span style="font-family: Karla, sans-serif;font-weight: bold;font-size: 18px;color: rgb(242,242,242);">Interval (sec):&nbsp;</span><input type="number" id="interval" style="width: 50px;/*background: rgba(255,255,255,0.85);*/outline: none;text-align: center;border: 1px solid rgba(255,255,255,0.25);background-color: transparent;color: white;border-radius: 4px;font-family: Karla, sans-serif;" min="0"></div>
-        <div class="col d-flex d-md-flex justify-content-center justify-content-md-center" style="margin-top: 14px;">
-            <div class="btn-group" role="group" style="font-family: Karla, sans-serif;font-weight: bold;"><button class="btn btn-success text-nowrap d-flex justify-content-center align-items-center" id="startRefresh" type="button" style="border-top-left-radius: 99px;border-bottom-left-radius: 99px;width: 80px;/*padding-right: 10px;*/"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21ZM12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23Z" fill="currentColor"></path>
-                        <path d="M16 12L10 16.3301V7.66987L16 12Z" fill="currentColor"></path>
-                    </svg>&nbsp;Start</button><button class="btn btn-danger text-nowrap d-flex justify-content-center align-items-center" id="stopRefresh" type="button" style="border-bottom-right-radius: 99px;border-top-right-radius: 99px;width: 80px;padding-left: 10px;"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none">
-                        <path d="M15 9H9V15H15V9Z" fill="currentColor"></path>
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12C1 5.92487 5.92487 1 12 1C18.0751 1 23 5.92487 23 12ZM21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" fill="currentColor"></path>
-                    </svg>&nbsp;Stop</button></div>
-        </div>
-        <div class="col" style="padding: 0px;margin-top: 6px;"><span style="color: rgb(242,242,242);font-size: 10px;opacity: 0.75;font-family: Karla, sans-serif;">Created By:&nbsp;<a href="https://twitter.com/vastblast" target="_blank" style="color: var(--teal);"><span style="text-decoration: underline;">@VastBlast</span></a>&nbsp;|&nbsp;<a href="https://github.com/VastBlast/ChromeAutoRefresh" target="_blank" style="color: var(--teal);"><span style="text-decoration: underline;">GitHub</span></a></span></div>
+<body class="new-body">
+<div id="main-container">
+    <div id="top-prompt-wrap">
+        <div id="top-prompt">Interval (sec): </div>
+        <input type="number" id="interval" min="0">
     </div>
-    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <div id="button-group">
+        <div class="new-button btn-group" role="group">
+            <button id="startRefresh" class="btn btn-success text-nowrap" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21ZM12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23Z" fill="currentColor"></path>
+                    <path d="M16 12L10 16.3301V7.66987L16 12Z" fill="currentColor"></path>
+                </svg> Start
+            </button>
+            <button id="stopRefresh" class="btn btn-danger" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+                    <path d="M15 9H9V15H15V9Z" fill="currentColor"></path>
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12C1 5.92487 5.92487 1 12 1C18.0751 1 23 5.92487 23 12ZM21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" fill="currentColor"></path>
+                </svg> Stop
+            </button>
+        </div>
+    </div>
+    <div class="credits">
+        Created By:
+        <a href="https://twitter.com/vastblast" target="_blank">@VastBlast</a> |
+        <a href="https://github.com/VastBlast/ChromeAutoRefresh" target="_blank">GitHub</a>
+    </div>
+</div>
+<script src="assets/bootstrap/js/bootstrap.min.js"></script>
 </body>
 
 </html>
