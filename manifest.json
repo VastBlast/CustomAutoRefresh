@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Custom Auto Refresh",
     "description": "A simple and lightweight extension that automatically refreshes a tab on a fully customizable interval.",
-    "version": "2.3.2",
+    "version": "2.3.3",
     "icons": {
         "48": "./icons/icon-inactive.png"
     },
