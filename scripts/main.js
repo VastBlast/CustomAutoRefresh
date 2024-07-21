@@ -1,10 +1,8 @@
+// Function to get the current active tab in the current window
 function getCurrentTab() {
     return new Promise((resolve, reject) => {
         try {
-            chrome.tabs.query({
-                active: true,
-                currentWindow: true,
-            }, function (tabs) {
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                 resolve(tabs[0]);
             });
         } catch (e) {
@@ -13,16 +11,18 @@ function getCurrentTab() {
     });
 }
 
+// Function to add event listeners to the start and stop buttons
 function activateListeners() {
+    // Listener for the start refresh button
     document.getElementById("startRefresh").addEventListener("click", async function () {
-        if (parseFloat(document.getElementById('interval').value) > 9999999999) {
-            document.getElementById('interval').value = '9999999999';
-        }
-        if (parseFloat(document.getElementById('interval').value) < 0.05) {
-            document.getElementById('interval').value = '0.05';
-        }
+        // Validate the interval input value
+        const intervalInput = document.getElementById('interval');
+        const intervalValue = parseFloat(intervalInput.value);
 
-        const interval = parseFloat(document.getElementById('interval').value) * 1000;
+        if (intervalValue > 99999999999) intervalInput.value = '99999999999';
+        if (intervalValue < 0.05) intervalInput.value = '0.05';
+
+        const interval = parseFloat(intervalInput.value) * 1000;
         if (!(interval > 0)) return;
 
         const tab = await getCurrentTab();
@@ -36,6 +36,7 @@ function activateListeners() {
         });
     });
 
+    // Listener for the stop refresh button
     document.getElementById("stopRefresh").addEventListener("click", async function () {
         const tab = await getCurrentTab();
         chrome.runtime.sendMessage({
@@ -48,34 +49,32 @@ function activateListeners() {
     });
 }
 
+// Function to update the popup UI based on the current state
 async function updatePopup() {
     const tab = await getCurrentTab();
+
+    // Request to get the current refresh time
     chrome.runtime.sendMessage({
         cmd: "getRefreshTime",
         tab: tab
     }, function (res) {
-        if (document.getElementById("interval").value == "") {
+        if (document.getElementById("interval").value === "") {
             document.getElementById("interval").value = res;
         }
     });
 
+    // Request to check if the current tab is being refreshed
     chrome.runtime.sendMessage({
         cmd: "isRefreshing",
         tab: tab
     }, function (res) {
-        if (res) {
-            document.getElementById("startRefresh").disabled = true;
-            document.getElementById("interval").disabled = true;
-            document.getElementById("stopRefresh").disabled = false;
-        } else {
-            document.getElementById("startRefresh").disabled = false;
-            document.getElementById("interval").disabled = false;
-            document.getElementById("stopRefresh").disabled = true;
-        }
+        document.getElementById("startRefresh").disabled = res;
+        document.getElementById("interval").disabled = res;
+        document.getElementById("stopRefresh").disabled = !res;
     });
 }
 
-
+// Initialize event listeners and update the popup UI when the DOM content is loaded
 document.addEventListener('DOMContentLoaded', function () {
     activateListeners();
     updatePopup();

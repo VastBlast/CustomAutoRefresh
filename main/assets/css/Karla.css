@@ -1,15 +1,15 @@
 @font-face {
 	font-family: 'Karla';
-	src: url(../../assets/fonts/qkB9XvYC6trAT55ZBi1ueQVIjQTD-JrIH2G7nytkHRyQ8p4wUjm6bnEr.woff2) format('woff2');
+	src: url(../../assets/fonts/Karla-19e75ec4d6c20726e3dbf62a9c715e4e.woff2) format('woff2');
 	font-weight: 400;
 	font-style: normal;
 	font-display: auto;
-	unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+	unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
 	font-family: 'Karla';
-	src: url(../../assets/fonts/qkB9XvYC6trAT55ZBi1ueQVIjQTD-JrIH2G7nytkHRyQ8p4wUje6bg.woff2) format('woff2');
+	src: url(../../assets/fonts/Karla-625fdc91f2a767b12eed641e290c8674.woff2) format('woff2');
 	font-weight: 400;
 	font-style: normal;
 	font-display: auto;
@@ -18,16 +18,16 @@
 
 @font-face {
 	font-family: 'Karla';
-	src: url(../../assets/fonts/qkB9XvYC6trAT55ZBi1ueQVIjQTD-JrIH2G7nytkHRyQ8p4wUjm6bnEr.woff2) format('woff2');
+	src: url(../../assets/fonts/Karla-19e75ec4d6c20726e3dbf62a9c715e4e.woff2) format('woff2');
 	font-weight: 700;
 	font-style: normal;
 	font-display: auto;
-	unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+	unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
 	font-family: 'Karla';
-	src: url(../../assets/fonts/qkB9XvYC6trAT55ZBi1ueQVIjQTD-JrIH2G7nytkHRyQ8p4wUje6bg.woff2) format('woff2');
+	src: url(../../assets/fonts/Karla-625fdc91f2a767b12eed641e290c8674.woff2) format('woff2');
 	font-weight: 700;
 	font-style: normal;
 	font-display: auto;
