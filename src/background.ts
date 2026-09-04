@@ -30,7 +30,9 @@ interface RefreshJob extends StoredRefreshJob {
 
 interface StoredState {
   jobs: StoredRefreshJob[];
-  lastIntervals: Record<string, number>;
+  lastIntervalMs?: number | null;
+  // Legacy per-tab defaults from releases before lastIntervalMs.
+  lastIntervals?: Record<string, number>;
   lastOptions: RefreshOptions;
 }
 
@@ -56,7 +58,8 @@ const jobs = new Map<number, RefreshJob>();
 // reset per-tab action icons while a page reloads.
 const actionStates = new Map<number, ActionState>();
 const iconImageData = new Map<IconState, Record<number, ImageData>>();
-let lastIntervals: Record<string, number> = {};
+let lastIntervalMs: number | null = null;
+let legacyLastIntervals: Record<string, number> = {};
 let lastOptions: RefreshOptions = DEFAULT_OPTIONS;
 let scheduler: ReturnType<typeof setTimeout> | undefined;
 let initialized: Promise<void> | undefined;
@@ -119,7 +122,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 async function initialize(): Promise<void> {
   initialized ??= (async () => {
     const stored = await readStoredState();
-    lastIntervals = stored.lastIntervals;
+    lastIntervalMs = stored.lastIntervalMs ?? null;
+    legacyLastIntervals = stored.lastIntervals ?? {};
     lastOptions = stored.lastOptions;
     jobs.clear();
     for (const job of stored.jobs) {
@@ -168,7 +172,8 @@ async function startActiveTab(intervalSeconds: number, rawOptions: unknown): Pro
     options,
     refreshing: false
   });
-  lastIntervals[String(tab.id)] = intervalMs;
+  lastIntervalMs = intervalMs;
+  legacyLastIntervals = {};
   lastOptions = options;
   await saveState();
   await updateAction(tab.id);
@@ -193,7 +198,9 @@ async function stopTab(tabId: number): Promise<void> {
 async function forgetTab(tabId: number): Promise<void> {
   const job = jobs.get(tabId);
   if (job) {
-    lastIntervals[String(tabId)] = job.intervalMs;
+    if (lastIntervalMs === null) {
+      legacyLastIntervals[String(tabId)] = job.intervalMs;
+    }
     jobs.delete(tabId);
   }
   actionStates.delete(tabId);
@@ -300,8 +307,8 @@ async function getActiveTabState(): Promise<RefreshState> {
 function getStateForTab(tab: chrome.tabs.Tab | undefined): RefreshState {
   const tabId = tab?.id;
   const job = tabId === undefined ? undefined : jobs.get(tabId);
-  const fallbackMs = tabId === undefined ? DEFAULT_INTERVAL_SECONDS * 1000 : lastIntervals[String(tabId)];
-  const intervalMs = job?.intervalMs ?? fallbackMs ?? DEFAULT_INTERVAL_SECONDS * 1000;
+  const savedIntervalMs = lastIntervalMs ?? (tabId === undefined ? undefined : legacyLastIntervals[String(tabId)]);
+  const intervalMs = job?.intervalMs ?? savedIntervalMs ?? DEFAULT_INTERVAL_SECONDS * 1000;
 
   return {
     canRefresh: Boolean(tabId),
@@ -557,7 +564,8 @@ async function saveState(): Promise<void> {
       refreshCount,
       options
     })),
-    lastIntervals,
+    lastIntervalMs,
+    lastIntervals: legacyLastIntervals,
     lastOptions
   };
   await chromeCall<void>((resolve) => chrome.storage.local.set({ [STORAGE_KEY]: stored }, resolve));
@@ -565,7 +573,17 @@ async function saveState(): Promise<void> {
 
 function sanitizeStoredState(value: StoredState | undefined): StoredState {
   if (!value || typeof value !== 'object') {
-    return { jobs: [], lastIntervals: {}, lastOptions: DEFAULT_OPTIONS };
+    return { jobs: [], lastIntervalMs: null, lastIntervals: {}, lastOptions: DEFAULT_OPTIONS };
+  }
+
+  const lastIntervals: Record<string, number> = {};
+  if (value.lastIntervals && typeof value.lastIntervals === 'object' && !Array.isArray(value.lastIntervals)) {
+    for (const [tabId, storedInterval] of Object.entries(value.lastIntervals)) {
+      const intervalMs = normalizeStoredIntervalMs(storedInterval);
+      if (intervalMs !== undefined) {
+        lastIntervals[tabId] = intervalMs;
+      }
+    }
   }
 
   // Extension storage is user/modifiable state, so validate it before trusting
@@ -590,9 +608,17 @@ function sanitizeStoredState(value: StoredState | undefined): StoredState {
             options: sanitizeOptions(job.options)
           }))
       : [],
-    lastIntervals: value.lastIntervals && typeof value.lastIntervals === 'object' ? value.lastIntervals : {},
+    lastIntervalMs: normalizeStoredIntervalMs(value.lastIntervalMs) ?? null,
+    lastIntervals,
     lastOptions: sanitizeOptions(value.lastOptions)
   };
+}
+
+function normalizeStoredIntervalMs(value: unknown): number | undefined {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    return undefined;
+  }
+  return normalizeIntervalSeconds(value / 1000) * 1000;
 }
 
 function chromeCall<T>(action: (resolve: (value: T) => void) => void): Promise<T> {
