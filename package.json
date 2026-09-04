@@ -25,7 +25,7 @@
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tailwindcss/vite": "^4.3.1",
     "@tsconfig/svelte": "^5.0.2",
-    "@types/chrome": "^0.1.43",
+    "@types/chrome": "^0.2.8",
     "@types/node": "^25.9.3",
     "daisyui": "^5.5.23",
     "fflate": "^0.8.3",
@@ -35,6 +35,6 @@
     "tailwindcss": "^4.3.1",
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
-    "vitest": "^4.1.9"
+    "vitest": "^5.0.0"
   }
 }
